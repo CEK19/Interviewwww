@@ -56,5 +56,6 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "Interviewwww.sln"
+    "dotnet.defaultSolution": "Interviewwww.sln",
+    "svn.ignoreMissingSvnWarning": true
 }
