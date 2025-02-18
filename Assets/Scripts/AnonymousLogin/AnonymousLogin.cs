@@ -10,6 +10,7 @@ public class AnonymousLogin : MonoBehaviour
     public TMP_Text playFabIDText;   // UI Text for showing PlayFab ID
     public TMP_InputField nameInput; // UI InputField for entering display name & Enter
     public TMP_Text displayNameText; // UI Text for showing Display Name
+    public IncrementingStats incrementingStats; // Reference to IncrementingStats script
 
     private string customID; // Unique Custom ID for login
 
@@ -44,6 +45,7 @@ public class AnonymousLogin : MonoBehaviour
 
         // Get the player profile (including Display Name)
         GetPlayerProfile();
+        incrementingStats.GetCurrentStat();
     }
 
     void OnLoginFailure(PlayFabError error)

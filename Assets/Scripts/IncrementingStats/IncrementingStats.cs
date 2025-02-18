@@ -3,7 +3,9 @@ using UnityEngine.UI;
 using PlayFab;
 using PlayFab.ClientModels;
 using TMPro;
-using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 
 public class IncrementingStats : MonoBehaviour
 {
@@ -15,9 +17,6 @@ public class IncrementingStats : MonoBehaviour
     {
         // Add a listener to call the function when the button is clicked
         incrementButton.onClick.AddListener(() => IncrementStat(1));
-
-        // Load initial stat value
-        GetCurrentStat();
     }
 
     public void IncrementStat(int incrementBy = 1)
@@ -36,15 +35,26 @@ public class IncrementingStats : MonoBehaviour
 
     private void OnSuccess(ExecuteCloudScriptResult result)
     {
-        if (result.FunctionResult is Dictionary<string, object> dict && dict.TryGetValue("newTotalValue", out object newTotalValueObj))
+        try
         {
-            int newTotalValue = int.Parse(newTotalValueObj.ToString());
-            statText.text = $"{statName}: {newTotalValue}"; // Cập nhật UI với tổng giá trị mới
-            Debug.Log($"Updated {statName}: {newTotalValue}");
+            var jsonString = JsonConvert.SerializeObject(result.FunctionResult);
+            // Parse JSON string into JObject
+            JObject jsonResult = JObject.Parse(jsonString);
+
+            if (jsonResult.TryGetValue("newTotalValue", out JToken newTotalValueToken))
+            {
+                int newTotalValue = newTotalValueToken.Value<int>();
+                statText.text = $"{statName}: {newTotalValue}";
+                Debug.Log($"Updated stat value: {newTotalValue}");
+            }
+            else
+            {
+                Debug.LogWarning("Key 'newTotalValue' not found in FunctionResult.");
+            }
         }
-        else
+        catch (JsonException ex)
         {
-            Debug.LogWarning("CloudScript response does not contain expected data.");
+            Debug.LogError($"JSON Parsing Error: {ex.Message}");
         }
     }
 
@@ -53,7 +63,7 @@ public class IncrementingStats : MonoBehaviour
         Debug.LogError("Error updating stat: " + error.GenerateErrorReport());
     }
 
-    private void GetCurrentStat()
+    public void GetCurrentStat()
     {
         var request = new GetPlayerStatisticsRequest();
         PlayFabClientAPI.GetPlayerStatistics(request, OnGetStatsSuccess, OnError);
@@ -62,6 +72,7 @@ public class IncrementingStats : MonoBehaviour
     private void OnGetStatsSuccess(GetPlayerStatisticsResult result)
     {
         var stat = result.Statistics.Find(s => s.StatisticName == statName);
+        Debug.Log($"Player stat: {statName} = {stat.Value}");
         int currentStatValue = stat != null ? stat.Value : 0;
         statText.text = $"{statName}: {currentStatValue}";
         Debug.Log($"Initial {statName}: {currentStatValue}");

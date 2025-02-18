@@ -1203,7 +1203,6 @@ GameObject:
   - component: {fileID: 1425323965}
   - component: {fileID: 1425323964}
   - component: {fileID: 1425323963}
-  - component: {fileID: 1425323962}
   - component: {fileID: 1425323966}
   m_Layer: 5
   m_Name: IncrementBtn
@@ -1232,19 +1231,6 @@ RectTransform:
   m_AnchoredPosition: {x: -275.3, y: -10.7}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1425323962
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1425323960}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a0e7f991e5774ae47a76282cbcfcc121, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  statText: {fileID: 0}
 --- !u!114 &1425323963
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1340,6 +1326,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   statText: {fileID: 1220846589}
+  incrementButton: {fileID: 1425323963}
 --- !u!1 &1501931252
 GameObject:
   m_ObjectHideFlags: 0
@@ -1710,6 +1697,7 @@ MonoBehaviour:
   playFabIDText: {fileID: 1501931254}
   nameInput: {fileID: 82850146}
   displayNameText: {fileID: 1874069348}
+  incrementingStats: {fileID: 1425323966}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
