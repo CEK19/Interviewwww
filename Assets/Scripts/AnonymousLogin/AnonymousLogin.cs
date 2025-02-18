@@ -8,7 +8,7 @@ using TMPro;
 public class AnonymousLogin : MonoBehaviour
 {
     public TMP_Text playFabIDText;   // UI Text for showing PlayFab ID
-    public TMP_InputField nameInput; // UI InputField for entering display name
+    public TMP_InputField nameInput; // UI InputField for entering display name & Enter
     public TMP_Text displayNameText; // UI Text for showing Display Name
 
     private string customID; // Unique Custom ID for login
@@ -16,7 +16,8 @@ public class AnonymousLogin : MonoBehaviour
     void Start()
     {
         // Disable input field before login
-        // nameInput.interactable = false;
+        nameInput.interactable = false;
+        nameInput.placeholder.GetComponent<TMP_Text>().text = "Enter Display Name & Press Enter";
         nameInput.onSubmit.AddListener(delegate { SetDisplayName(); });
         LoginWithCustomID();
     }
