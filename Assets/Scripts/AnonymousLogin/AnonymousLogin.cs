@@ -4,28 +4,42 @@ using UnityEngine;
 using PlayFab;
 using PlayFab.ClientModels;
 using TMPro;
+using UnityEngine.UI;
 
 public class AnonymousLogin : MonoBehaviour
 {
-    public TMP_Text playFabIDText;   // UI Text for showing PlayFab ID
-    public TMP_InputField nameInput; // UI InputField for entering display name & Enter
-    public TMP_Text displayNameText; // UI Text for showing Display Name
-    public IncrementingStats incrementingStats; // Reference to IncrementingStats script
+    [SerializeField] private TMP_InputField playFabIDTextInput;   // UI Text for showing PlayFab ID
+    [SerializeField] private TMP_InputField nameInput; // UI InputField for entering display name & Enter
+    [SerializeField] private TMP_Text displayNameText; // UI Text for showing Display Name
+    [SerializeField] private Button loginButton; // UI Button for login
+    [SerializeField] private IncrementingStats incrementingStats; // Reference to IncrementingStats script
+    [SerializeField] private TopLeaderBoard topLeaderBoard; // Reference to TopLeaderBoard script
 
     private string customID; // Unique Custom ID for login
 
-    void Start()
+    private void Start()
     {
-        // Disable input field before login
-        nameInput.interactable = false;
-        nameInput.placeholder.GetComponent<TMP_Text>().text = "Enter Display Name & Press Enter";
-        nameInput.onSubmit.AddListener(delegate { SetDisplayName(); });
+        Initialize();
         LoginWithCustomID();
     }
 
-    void LoginWithCustomID()
+
+    private void Initialize()
     {
-        customID = SystemInfo.deviceUniqueIdentifier; // Use device ID as custom ID
+        // Enable login button & add listener
+        loginButton.enabled = true;
+        loginButton.onClick.AddListener(LoginWithCustomID);
+
+        // Disable input field before login because we need PlayFab ID to update display name
+        nameInput.interactable = false;
+        nameInput.placeholder.GetComponent<TMP_Text>().text = "Enter Display Name & Press Enter";
+        nameInput.onSubmit.AddListener(delegate { SetDisplayName(); });
+    }
+
+    private void LoginWithCustomID()
+    {
+        customID = playFabIDTextInput.text;
+        Debug.Log("Logging in with Custom ID: " + customID);
         var request = new LoginWithCustomIDRequest
         {
             CustomId = customID,
@@ -35,31 +49,26 @@ public class AnonymousLogin : MonoBehaviour
         PlayFabClientAPI.LoginWithCustomID(request, OnLoginSuccess, OnLoginFailure);
     }
 
-    void OnLoginSuccess(LoginResult result)
+    private void OnLoginSuccess(LoginResult result)
     {
-        Debug.Log("Login Success! PlayFab ID: " + result.PlayFabId);
-        playFabIDText.text = "PlayFab ID: " + result.PlayFabId;
 
-        // Enable input field after login
         nameInput.interactable = true;
+        playFabIDTextInput.interactable = false;
+        loginButton.enabled = false;
 
         // Get the player profile (including Display Name)
         GetPlayerProfile();
         incrementingStats.GetCurrentStat();
+        topLeaderBoard.FetchLeaderboard();
     }
 
-    void OnLoginFailure(PlayFabError error)
+    private void OnLoginFailure(PlayFabError error)
     {
         Debug.LogError("Login Failed: " + error.GenerateErrorReport());
     }
 
     public void SetDisplayName()
     {
-        if (string.IsNullOrEmpty(nameInput.text))
-        {
-            Debug.LogError("Display name cannot be empty!");
-            return;
-        }
 
         var request = new UpdateUserTitleDisplayNameRequest
         {
@@ -69,13 +78,12 @@ public class AnonymousLogin : MonoBehaviour
         PlayFabClientAPI.UpdateUserTitleDisplayName(request, OnDisplayNameUpdated, OnDisplayNameUpdateFailed);
     }
 
-    void OnDisplayNameUpdated(UpdateUserTitleDisplayNameResult result)
+    private void OnDisplayNameUpdated(UpdateUserTitleDisplayNameResult result)
     {
-        Debug.Log("Display Name Updated: " + result.DisplayName);
         displayNameText.text = "Display Name: " + result.DisplayName;
     }
 
-    void OnDisplayNameUpdateFailed(PlayFabError error)
+    private void OnDisplayNameUpdateFailed(PlayFabError error)
     {
         Debug.LogError("Failed to update display name: " + error.GenerateErrorReport());
     }
@@ -91,7 +99,6 @@ public class AnonymousLogin : MonoBehaviour
         {
             if (result.PlayerProfile != null)
             {
-                Debug.Log("Retrieved Display Name: " + result.PlayerProfile.DisplayName);
                 displayNameText.text = "Display Name: " + (result.PlayerProfile.DisplayName ?? "None");
             }
         }, error =>
