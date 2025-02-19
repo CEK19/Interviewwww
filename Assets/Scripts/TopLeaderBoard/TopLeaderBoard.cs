@@ -3,7 +3,6 @@ using PlayFab;
 using PlayFab.ClientModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
 using TMPro;
 
 public class TopLeaderBoard : MonoBehaviour
@@ -13,47 +12,22 @@ public class TopLeaderBoard : MonoBehaviour
 
     public void FetchLeaderboard()
     {
-        var request = new ExecuteCloudScriptRequest
+        API.Instance.GetLeaderBoard(maxResults,
+        (result) =>
         {
-            FunctionName = "GetTopScores",
-            FunctionParameter = new { statName = "Kills", maxResultsCount = maxResults },
-            GeneratePlayStreamEvent = true
-        };
-
-        PlayFabClientAPI.ExecuteCloudScript(request, OnCloudScriptSuccess, OnError);
-    }
-
-    private void OnCloudScriptSuccess(ExecuteCloudScriptResult result)
-    {
-        Debug.Log("Leaderboard fetched successfully!");
-
-        try
-        {
-            var jsonString = JsonConvert.SerializeObject(result.FunctionResult);
-            JObject jsonResult = JObject.Parse(jsonString);
-            JArray leaderboardArray = (JArray)jsonResult["leaderboard"];
-
+            var topPlayers = result.TopKillPlayerInfos;
             string rankInfo = "";
-            foreach (JObject player in leaderboardArray)
-            {
-                string name = player["DisplayName"].ToString();
-                int rank = player["Rank"].Value<int>();
-                int score = player["Score"].Value<int>();
 
-                rankInfo += $"{rank}. {name} - {score}\n";
+            foreach (var player in topPlayers)
+            {
+                rankInfo += $"{player.TopPosition}. {player.DisplayName} - {player.Kills}\n";
             }
 
             leaderboardText.text = rankInfo;
-        }
-        catch (JsonException ex)
+        },
+        (error) =>
         {
-            Debug.LogError($"JSON Parsing Error: {ex.Message}");
-        }
-
-    }
-
-    private void OnError(PlayFabError error)
-    {
-        Debug.LogError($"PlayFab API Error: {error.GenerateErrorReport()}");
+            Debug.LogError($"PlayFab API Error: {error.Message}");
+        });
     }
 }

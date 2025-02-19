@@ -19,6 +19,11 @@ public class IncrementingStats : MonoBehaviour
         incrementButton.onClick.AddListener(() => IncrementStat(1));
     }
 
+    public void SetStat(int numKills)
+    {
+        statText.text = $"{statName}: {numKills}";
+    }
+
     public void IncrementStat(int incrementBy = 1)
     {
         var request = new ExecuteCloudScriptRequest
@@ -38,14 +43,12 @@ public class IncrementingStats : MonoBehaviour
         try
         {
             var jsonString = JsonConvert.SerializeObject(result.FunctionResult);
-            // Parse JSON string into JObject
             JObject jsonResult = JObject.Parse(jsonString);
 
             if (jsonResult.TryGetValue("newTotalValue", out JToken newTotalValueToken))
             {
                 int newTotalValue = newTotalValueToken.Value<int>();
-                statText.text = $"{statName}: {newTotalValue}";
-                Debug.Log($"Updated stat value: {newTotalValue}");
+                SetStat(newTotalValue);
             }
             else
             {
@@ -63,18 +66,4 @@ public class IncrementingStats : MonoBehaviour
         Debug.LogError("Error updating stat: " + error.GenerateErrorReport());
     }
 
-    public void GetCurrentStat()
-    {
-        var request = new GetPlayerStatisticsRequest();
-        PlayFabClientAPI.GetPlayerStatistics(request, OnGetStatsSuccess, OnError);
-    }
-
-    private void OnGetStatsSuccess(GetPlayerStatisticsResult result)
-    {
-        var stat = result.Statistics.Find(s => s.StatisticName == statName);
-        Debug.Log($"Player stat: {statName} = {stat.Value}");
-        int currentStatValue = stat != null ? stat.Value : 0;
-        statText.text = $"{statName}: {currentStatValue}";
-        Debug.Log($"Initial {statName}: {currentStatValue}");
-    }
 }
