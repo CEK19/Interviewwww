@@ -61,7 +61,7 @@ public class API : MonoBehaviour
     {
         var request = new UpdatePlayerStatisticsRequest
         {
-            Statistics = new System.Collections.Generic.List<StatisticUpdate>
+            Statistics = new List<StatisticUpdate>
             {
                 new StatisticUpdate { StatisticName = "Kills", Value = 0 },
             }

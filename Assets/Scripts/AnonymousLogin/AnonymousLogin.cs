@@ -121,7 +121,7 @@ public class AnonymousLogin : MonoBehaviour
         API.Instance.CreateDefaultStats(
             (result) =>
             {
-                // Do nothing
+                Debug.Log("Default stats created successfully.");
             },
             (error) => Debug.LogError("Failed to create default stats: " + error.Message)
         );
