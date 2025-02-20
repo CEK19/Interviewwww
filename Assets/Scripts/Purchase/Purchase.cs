@@ -23,7 +23,7 @@ public class Purchase : MonoBehaviour
             100,
             (result) =>
             {
-                BalanceText.text = "Balance: " + result.Balance;
+                SetUIBalance(result.Balance);
             },
             (error) =>
             {
@@ -53,12 +53,7 @@ public class Purchase : MonoBehaviour
         API.Instance.GetInventory(
             (result) =>
             {
-                string inventory = "Inventory: ";
-                foreach (var item in result.Inventory)
-                {
-                    inventory += item.DisplayName + ", ";
-                }
-                InventoryText.text = inventory;
+                SetUIInventory(result.Inventory);
             },
             (error) =>
             {
@@ -72,12 +67,27 @@ public class Purchase : MonoBehaviour
         API.Instance.GetUserBalance(
             (result) =>
             {
-                BalanceText.text = "Balance: " + result.Balance;
+                SetUIBalance(result.Balance);
             },
             (error) =>
             {
                 Debug.LogError("Error: " + error.Message);
             }
             );
+    }
+
+    private void SetUIInventory(List<Item> inventory)
+    {
+        string inventoryText = "Inventory: ";
+        foreach (var item in inventory)
+        {
+            inventoryText += item.DisplayName + ", ";
+        }
+        InventoryText.text = inventoryText;
+    }
+
+    private void SetUIBalance(int balance)
+    {
+        BalanceText.text = "Balance: " + balance;
     }
 }

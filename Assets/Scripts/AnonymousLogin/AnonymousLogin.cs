@@ -101,7 +101,7 @@ public class AnonymousLogin : MonoBehaviour
 
         (name) =>
         {
-            displayNameText.text = "Display Name: " + name;
+            SetUIDisplayName(name);
         },
         (error) => Debug.LogError("Failed to update display name: " + error.Message)
         );
@@ -112,7 +112,7 @@ public class AnonymousLogin : MonoBehaviour
         API.Instance.GetPlayerProfile(
             (response) =>
             {
-                displayNameText.text = "Display Name: " + response.DisplayName;
+                SetUIDisplayName(response.DisplayName);
             },
             (error) => Debug.LogError("Failed to get player profile: " + error.Message)
         );
@@ -128,5 +128,10 @@ public class AnonymousLogin : MonoBehaviour
             },
             (error) => Debug.LogError("Failed to create default stats: " + error.Message)
         );
+    }
+
+    private void SetUIDisplayName(string name)
+    {
+        displayNameText.text = "Display Name: " + name;
     }
 }
