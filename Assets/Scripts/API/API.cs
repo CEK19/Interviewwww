@@ -5,6 +5,7 @@ using UnityEngine;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+
 public class API : MonoBehaviour
 {
     public static API Instance { get; private set; }
@@ -141,5 +142,66 @@ public class API : MonoBehaviour
             }
         },
         error => onFailure?.Invoke(new ErrorReport(error.GenerateErrorReport())));
+    }
+
+    public void GrantGold(int amount, Action<GrantCurrencyResponse> onSuccess, Action<ErrorReport> onFailure)
+    {
+        var request = new ExecuteCloudScriptRequest
+        {
+            FunctionName = "GrantGold",
+            FunctionParameter = new { amount = amount },
+            GeneratePlayStreamEvent = true
+        };
+
+        PlayFabClientAPI.ExecuteCloudScript(request, result =>
+        {
+            var jsonString = JsonConvert.SerializeObject(result.FunctionResult);
+            JObject jsonResult = JObject.Parse(jsonString);
+            var response = new GrantCurrencyResponse { Balance = jsonResult["newBalance"].Value<int>() };
+            onSuccess?.Invoke(response);
+        },
+        error => onFailure?.Invoke(new ErrorReport(error.GenerateErrorReport())));
+    }
+
+    public void PurchaseItem(string itemId, Action<PurchaseItemResponse> onSuccess, Action<ErrorReport> OnFailure)
+    {
+        var request = new ExecuteCloudScriptRequest
+        {
+            FunctionName = "PurchaseItem",
+            FunctionParameter = new { itemId = itemId },
+            GeneratePlayStreamEvent = true
+        };
+
+        PlayFabClientAPI.ExecuteCloudScript(request, result =>
+        {
+            var jsonString = JsonConvert.SerializeObject(result.FunctionResult);
+            JObject jsonResult = JObject.Parse(jsonString);
+            var response = new PurchaseItemResponse
+            {
+                Balance = jsonResult["newBalance"].Value<int>(),
+                ItemId = jsonResult["itemId"].Value<string>()
+            };
+            onSuccess?.Invoke(response);
+        },
+        error => OnFailure?.Invoke(new ErrorReport(error.GenerateErrorReport())));
+    }
+
+    public void GetItemPrice(string itemId, Action<GetItemPriceResponse> onSuccess, Action<ErrorReport> onFailure)
+    {
+        PlayFabClientAPI.GetCatalogItems(new GetCatalogItemsRequest(),
+        result =>
+        {
+            foreach (var item in result.Catalog)
+            {
+                if (item.ItemId == itemId)
+                {
+                    var response = new GetItemPriceResponse { ItemId = item.ItemId, Price = (int)item.VirtualCurrencyPrices["GC"] };
+                    onSuccess?.Invoke(response);
+                    return;
+                }
+            }
+        },
+        error => onFailure?.Invoke(new ErrorReport(error.GenerateErrorReport()))
+        );
     }
 }
