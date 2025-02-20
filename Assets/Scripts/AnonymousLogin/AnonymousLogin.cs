@@ -15,6 +15,7 @@ public class AnonymousLogin : MonoBehaviour
     [SerializeField] private Button loginButton; // UI Button for login
     [SerializeField] private TopLeaderBoard topLeaderBoard; // Reference to TopLeaderBoard script
     [SerializeField] private IncrementingStats incrementingStats; // Reference to IncrementingStats script
+    [SerializeField] private Purchase purchase; // Reference to Purchase script
 
 
     private string customID; // Unique Custom ID for login
@@ -56,6 +57,8 @@ public class AnonymousLogin : MonoBehaviour
         GetPlayerProfile();
 
         topLeaderBoard.FetchLeaderboard();
+        purchase.GetUserBalanace();
+        purchase.GetInventory();
     }
 
     private void OnLoginFailure(ErrorReport error)

@@ -204,4 +204,38 @@ public class API : MonoBehaviour
         error => onFailure?.Invoke(new ErrorReport(error.GenerateErrorReport()))
         );
     }
+
+    public void GetInventory(Action<InventoryResponse> onSuccess, Action<ErrorReport> onFailure)
+    {
+
+        PlayFabClientAPI.GetUserInventory(new GetUserInventoryRequest(),
+            result =>
+            {
+
+                var response = new InventoryResponse { Inventory = new List<Item>() };
+
+                foreach (var item in result.Inventory)
+                {
+                    response.Inventory.Add(new Item
+                    {
+                        ItemId = item.ItemId,
+                        DisplayName = item.DisplayName,
+                    });
+                }
+                onSuccess?.Invoke(response);
+            },
+            error => onFailure?.Invoke(new ErrorReport(error.GenerateErrorReport())));
+
+    }
+
+    public void GetUserBalance(Action<GetUserBalanceResponse> onSuccess, Action<ErrorReport> onFailure)
+    {
+        PlayFabClientAPI.GetUserInventory(new GetUserInventoryRequest(),
+            result =>
+            {
+                var response = new GetUserBalanceResponse { Balance = result.VirtualCurrency["GC"] };
+                onSuccess?.Invoke(response);
+            },
+            error => onFailure?.Invoke(new ErrorReport(error.GenerateErrorReport())));
+    }
 }
